@@ -1,0 +1,18 @@
+# Tool-specific configurations
+.kilocodemodes
+.bmad-core/
+.gemini/
+
+# Node.js dependencies
+frontend/node_modules/
+frontend/package-lock.json
+
+# Python virtual environment
+venv/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+.env
