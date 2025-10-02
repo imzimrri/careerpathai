@@ -3,14 +3,14 @@
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
   "functions": {
-    "api/index.py": {
+    "api/vercel_handler.py": {
       "runtime": "python3.9"
     }
   },
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "/api/index"
+      "destination": "/api/vercel_handler"
     }
   ]
 }

@@ -426,10 +426,6 @@ async def generate_career_path(user_input: UserInput):
                 weaviate_client.disconnect()
 
 
-# Vercel serverless function handler
-handler = app
-
-
 # For local development
 if __name__ == "__main__":
     import uvicorn
