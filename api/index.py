@@ -12,11 +12,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
-from weaviate_client import get_weaviate_client
-from friendli_client import get_friendli_client
-from aci_client import get_aci_client
-from daytona_client import get_daytona_client
-from comet_client import get_comet_client
+from api.weaviate_client import get_weaviate_client
+from api.friendli_client import get_friendli_client
+from api.aci_client import get_aci_client
+from api.daytona_client import get_daytona_client
+from api.comet_client import get_comet_client
 
 # Load environment variables
 load_dotenv()
@@ -157,6 +157,11 @@ async def generate_career_path(user_input: UserInput):
     # Initialize clients
     weaviate_client = None
     comet_client = get_comet_client()
+    
+    # Debug: Log Comet client status
+    logger.info(f"Comet client initialized: {comet_client.client is not None}")
+    logger.info(f"Comet API key present: {bool(comet_client.api_key)}")
+    logger.info(f"Comet project: {comet_client.project_name}")
     
     # Start Comet trace for complete workflow
     with comet_client.trace_request("career_path_generation", {
