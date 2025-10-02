@@ -3,6 +3,10 @@
 venv/
 .venv/
 env/
+
+# Ignore node_modules (contains Python files too!)
+node_modules/
+frontend/node_modules/
 .env/
 
 # Ignore all Python files in api/ except the handler
