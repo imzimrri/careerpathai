@@ -8,7 +8,7 @@ import logging
 from typing import List, Dict, Any, Optional
 import requests
 
-from api.tools import search_learning_content, get_tool_definition
+from api.lib.tools import search_learning_content, get_tool_definition
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

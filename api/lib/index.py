@@ -12,11 +12,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
-from api.weaviate_client import get_weaviate_client
-from api.friendli_client import get_friendli_client
-from api.aci_client import get_aci_client
-from api.daytona_client import get_daytona_client
-from api.comet_client import get_comet_client
+from api.lib.weaviate_client import get_weaviate_client
+from api.lib.friendli_client import get_friendli_client
+from api.lib.aci_client import get_aci_client
+from api.lib.daytona_client import get_daytona_client
+from api.lib.comet_client import get_comet_client
 
 # Load environment variables
 load_dotenv()

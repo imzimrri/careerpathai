@@ -174,14 +174,14 @@ class DaytonaClient:
             }
         
         finally:
-            # Always cleanup sandbox
+            # Always cleanup sandbox to free disk space
             if sandbox:
                 try:
-                    # Use stop() method to cleanup sandbox
-                    sandbox.stop()
-                    logger.info(f"Sandbox cleaned up successfully")
+                    # Delete sandbox to free up disk quota
+                    sandbox.delete()
+                    logger.info(f"Sandbox deleted successfully")
                 except Exception as e:
-                    logger.error(f"Failed to cleanup sandbox: {str(e)}")
+                    logger.error(f"Failed to delete sandbox: {str(e)}")
 
 
 def get_daytona_client() -> DaytonaClient:

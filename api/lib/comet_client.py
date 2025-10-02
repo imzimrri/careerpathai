@@ -15,18 +15,14 @@ logger = logging.getLogger(__name__)
 
 # Try to import Opik SDK
 try:
-    from opik import Opik, opik_context
-    from opik.decorator import track
+    from opik import Opik
+    from opik.decorator import tracker
     OPIK_SDK_AVAILABLE = True
-except ImportError:
-    logger.warning("Opik SDK not installed. Install with: pip install opik")
+    logger.info("✓ Opik SDK imported successfully")
+except ImportError as e:
+    logger.warning(f"Opik SDK not installed or import failed: {str(e)}")
+    logger.warning("Install with: pip install opik")
     OPIK_SDK_AVAILABLE = False
-
-# Configuration
-COMET_API_KEY = os.getenv("COMET_API_KEY")
-COMET_PROJECT_NAME = os.getenv("COMET_PROJECT_NAME", "careerpathai")
-COMET_WORKSPACE = os.getenv("COMET_WORKSPACE")
-
 
 class CometClient:
     """
@@ -36,14 +32,27 @@ class CometClient:
     
     def __init__(self):
         """Initialize Comet client with environment configuration."""
-        self.api_key = COMET_API_KEY
-        self.project_name = COMET_PROJECT_NAME
-        self.workspace = COMET_WORKSPACE
+        # Read environment variables at initialization time (after load_dotenv())
+        comet_api_key = os.getenv("COMET_API_KEY")
+        comet_project_name = os.getenv("COMET_PROJECT_NAME", "careerpathai")
+        comet_workspace = os.getenv("COMET_WORKSPACE")
+        
+        # Opik-specific configuration (preferred)
+        self.api_key = os.getenv("OPIK_API_KEY", comet_api_key)
+        self.project_name = os.getenv("OPIK_PROJECT_NAME", comet_project_name)
+        self.workspace = os.getenv("OPIK_WORKSPACE", comet_workspace)
+        
+        # Debug logging
+        logger.info(f"Opik Configuration Check:")
+        logger.info(f"  API Key present: {bool(self.api_key)}")
+        logger.info(f"  Project Name: {self.project_name}")
+        logger.info(f"  Workspace: {self.workspace or 'Not set'}")
         self.client = None
         self.current_trace = None
         
         if not self.api_key:
-            logger.warning("Comet API key not found in environment variables")
+            logger.warning("Opik API key not found in environment variables")
+            logger.warning("Please set OPIK_API_KEY or COMET_API_KEY in your .env file")
         elif not OPIK_SDK_AVAILABLE:
             logger.warning("Opik SDK not available")
         else:
@@ -57,10 +66,12 @@ class CometClient:
                 if self.workspace:
                     config_params["workspace"] = self.workspace
                 
+                logger.info(f"Initializing Opik client with project: {self.project_name}")
                 self.client = Opik(**config_params)
-                logger.info(f"Opik client initialized for project: {self.project_name}")
+                logger.info(f"✓ Opik client initialized successfully for project: {self.project_name}")
             except Exception as e:
-                logger.error(f"Failed to initialize Opik client: {str(e)}")
+                logger.error(f"✗ Failed to initialize Opik client: {str(e)}")
+                logger.error(f"   Check your API key and project name in .env file")
                 self.client = None
     
     @contextmanager
@@ -77,35 +88,43 @@ class CometClient:
         """
         if not self.client:
             # If Opik not available, just yield None and continue
-            logger.debug("Opik client not available, skipping trace")
+            logger.warning("⚠️  Opik client not available, skipping trace")
+            logger.warning(f"   API Key present: {bool(self.api_key)}")
+            logger.warning(f"   Project: {self.project_name}")
             yield None
             return
         
         trace = None
         try:
             # Create trace
+            logger.info(f"🔵 Creating Opik trace: {name}")
             trace = self.client.trace(
                 name=name,
                 input=metadata,
                 metadata=metadata
             )
             self.current_trace = trace
-            logger.info(f"Started trace: {name}")
+            logger.info(f"✅ Started trace: {name} (ID: {trace.id if hasattr(trace, 'id') else 'unknown'})")
             
             yield trace
             
         except Exception as e:
-            logger.warning(f"Error in trace context: {str(e)}")
+            logger.error(f"❌ Error in trace context: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
             yield None
         
         finally:
             # Finalize trace
             if trace:
                 try:
+                    logger.info(f"🔵 Finalizing trace: {name}")
                     trace.end()
-                    logger.info(f"Finalized trace: {name}")
+                    logger.info(f"✅ Finalized trace: {name}")
                 except Exception as e:
-                    logger.warning(f"Error finalizing trace: {str(e)}")
+                    logger.error(f"❌ Error finalizing trace: {str(e)}")
+                    import traceback
+                    logger.error(traceback.format_exc())
             
             self.current_trace = None
     
@@ -344,11 +363,18 @@ class CometClient:
             return
         
         try:
-            self.current_trace.log_error(
-                component=component,
-                error_message=error_message,
-                error_type=error_type
+            # Log error as a span with error metadata
+            error_span = self.current_trace.span(
+                name=f"error_{component}",
+                input={"component": component, "error_type": error_type},
+                output={"error_message": error_message},
+                metadata={
+                    "error": True,
+                    "error_type": error_type,
+                    "component": component
+                }
             )
+            error_span.end()
             logger.debug(f"Logged error for {component}")
         
         except Exception as e:
