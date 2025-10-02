@@ -22,9 +22,5 @@
       "src": "/(.*)",
       "dest": "frontend/$1"
     }
-  ],
-  "env": {
-    "WEAVIATE_URL": "@weaviate-url",
-    "WEAVIATE_API_KEY": "@weaviate-api-key"
-  }
+  ]
 }
