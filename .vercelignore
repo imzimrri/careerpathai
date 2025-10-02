@@ -1,3 +1,10 @@
+# Ignore Python virtual environment - THIS IS CRITICAL
+
+venv/
+.venv/
+env/
+.env/
+
 # Ignore all Python files in api/ except the handler
 
 api/\*.py
@@ -5,8 +12,9 @@ api/\*.py
 
 # Ignore test files
 
-api/test\__.py
-api/_\_test.py
+api/test**.py
+api/*\_test.py
+api/lib/test*\*.py
 
 # Ignore documentation
 
@@ -19,3 +27,18 @@ docs/
 .env
 .env.\*
 !.env.example
+
+# Ignore Python cache
+
+**pycache**/
+_.pyc
+_.pyo
+\*.pyd
+.Python
+
+# Ignore IDE files
+
+.vscode/
+.idea/
+_.swp
+_.swo
