@@ -1,0 +1,21 @@
+# Ignore all Python files in api/ except the handler
+
+api/\*.py
+!api/vercel_handler.py
+
+# Ignore test files
+
+api/test\__.py
+api/_\_test.py
+
+# Ignore documentation
+
+docs/
+\*.md
+!README.md
+
+# Ignore environment files
+
+.env
+.env.\*
+!.env.example
